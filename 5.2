@@ -1,0 +1,42 @@
+import random
+
+def generate_matrices(num):
+    matrices = []
+    for _ in range(num):
+        rows = random.randint(1, 5)
+        cols = random.randint(1, 5)
+        matrix = [[random.randint(0, 10) for _ in range(cols)] for _ in range(rows)]
+        matrices.append(matrix)
+    return matrices
+
+def matrix_chain_order(matrices):
+    n = len(matrices)
+    dp = [[float('inf')] * n for _ in range(n)]
+    brackets = [[0] * n for _ in range(n)]
+
+    for i in range(n):
+        dp[i][i] = 0
+
+    for length in range(2, n+1):
+        for i in range(n-length+1):
+            j = i + length - 1
+            for k in range(i, j):
+                cost = dp[i][k] + dp[k+1][j] + len(matrices[i]) * len(matrices[k][0]) * len(matrices[j][0])
+                if cost < dp[i][j]:
+                    dp[i][j] = cost
+                    brackets[i][j] = k
+
+    return dp[0][n-1], brackets
+
+def parenthesize(matrices, brackets, i, j):
+    if i == j:
+        return 'A' + str(i)
+    else:
+        return '(' + parenthesize(matrices, brackets, i, brackets[i][j]) + ' * ' + parenthesize(matrices, brackets, brackets[i][j] + 1, j) + ')'
+
+matrices = generate_matrices(5)
+cost, brackets = matrix_chain_order(matrices)
+result = parenthesize(matrices, brackets, 0, len(matrices)-1)
+print(matrices)
+print("Порядок действий:", result)
+print("Количество скалярных операций:", cost)
